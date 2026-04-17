@@ -3,6 +3,8 @@ import { useAppData } from '../DataContext';
 import StatsStrip from '../components/StatsStrip';
 import MLExplainer from '../components/MLExplainer';
 import ZoneCard from '../components/ZoneCard';
+import NetworkTopology from '../components/NetworkTopology';
+import { ShieldCheck, Zap, Activity, Info } from 'lucide-react';
 
 function IndexComponent() {
   const { data, ZONE_NAMES } = useAppData();
@@ -13,61 +15,122 @@ function IndexComponent() {
     : '—';
 
   return (
-    <>
+    <div className="flex flex-col gap-12 animate-entrance relative z-10">
+      {/* Hero Header: AI Precision + Arches */}
       <StatsStrip totalZones={zones.length || 5} anomalies={anomalyCount} confidence={avgConfidence} />
 
-      <div className="grid grid-cols-12 gap-6">
-        {/* Left: ML Explainer */}
-        <div className="col-span-12 lg:col-span-4">
-          <MLExplainer />
-        </div>
-
-        {/* Right: Zone Cards + System Summary */}
-        <div className="col-span-12 lg:col-span-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-            {zones.map(zone => (
-              <ZoneCard
-                key={zone}
-                zoneId={zone}
-                regionName={ZONE_NAMES[zone] || zone}
-                data={data.recent[zone]}
-                history={(data.history || []).filter(h => h.zone === zone).slice(-20)}
-              />
-            ))}
-
-            {/* System Summary Card */}
-            <div className="glass grid-noise p-5 flex flex-col justify-between">
-              <div>
-                <p className="text-xs font-semibold tracking-widest uppercase mb-1" style={{ color: 'var(--color-muted)' }}>NETWORK HEALTH</p>
-                <h3 className="text-lg font-bold mb-4">System Summary</h3>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: anomalyCount > 0 ? 'oklch(0.66 0.24 25 / 0.15)' : 'oklch(0.88 0.22 145 / 0.15)' }}>
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={anomalyCount > 0 ? 'oklch(0.66 0.24 25)' : 'oklch(0.88 0.22 145)'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-                </div>
-                <div>
-                  <p className="text-3xl font-bold" style={{ fontVariantNumeric: 'tabular-nums' }}>{avgConfidence}%</p>
-                  <p className="text-sm" style={{ color: 'var(--color-muted)' }}>
-                    {anomalyCount > 0 ? `${anomalyCount} active alert${anomalyCount > 1 ? 's' : ''}` : 'All systems nominal'}
-                  </p>
-                </div>
-              </div>
-            </div>
+      {/* Real-Time Telemetry Section */}
+      <section className="flex flex-col gap-8">
+        <div className="flex items-end justify-between px-4">
+          <div className="flex flex-col gap-1">
+             <span className="text-[10px] font-black tracking-[0.4em] text-white/30 uppercase italic">Real-Time Telemetry</span>
+             <h2 className="text-4xl font-black hero-text text-white">Active Nodes</h2>
           </div>
+          <button className="text-[11px] font-black tracking-widest text-primary uppercase border-b-2 border-primary/20 hover:border-primary transition-all pb-1">
+            VIEW ALL
+          </button>
         </div>
-      </div>
 
-      {/* Footer */}
-      <footer className="glass p-4 flex flex-wrap items-center justify-between gap-4 text-xs" style={{ color: 'var(--color-muted)' }}>
-        <span>Edge inference · Isolation Forest · 1,000-row training set</span>
-        <div className="flex items-center gap-4">
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full" style={{ background: 'var(--color-primary)' }} /> Pressure</span>
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full" style={{ background: 'var(--color-accent)' }} /> Flow</span>
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full" style={{ background: 'var(--color-destructive)' }} /> Anomaly</span>
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full" style={{ background: 'var(--color-violet)' }} /> AI Score</span>
+        {/* Row 1: Zones A, B, C */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {zones.slice(0, 3).map(zone => (
+            <ZoneCard
+              key={zone}
+              zoneId={zone}
+              regionName={ZONE_NAMES[zone] || zone}
+              data={data.recent[zone]}
+              history={(data.history || []).filter(h => h.zone === zone).slice(-20)}
+            />
+          ))}
         </div>
+
+        {/* Row 2: Zones D, E centered */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-[66%] mx-auto w-full">
+          {zones.slice(3, 5).map(zone => (
+            <ZoneCard
+              key={zone}
+              zoneId={zone}
+              regionName={ZONE_NAMES[zone] || zone}
+              data={data.recent[zone]}
+              history={(data.history || []).filter(h => h.zone === zone).slice(-20)}
+            />
+          ))}
+        </div>
+      </section>
+
+      {/* Infrastructure Topology (Wide) */}
+      <section className="flex flex-col gap-8">
+        <div className="flex items-center gap-4 px-4 text-white/30">
+           <Activity size={18} />
+           <span className="text-[10px] font-black tracking-[0.4em] uppercase">Live Infrastructure</span>
+           <div className="h-px flex-1 bg-white/5" />
+        </div>
+        <NetworkTopology data={data} />
+      </section>
+
+      {/* Intelligence Bento Hub */}
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
+         {/* Security Card */}
+         <div className="lg:col-span-5 glass-aurora p-8 rounded-[40px] flex flex-col gap-6 group">
+            <div className="flex items-center gap-4">
+               <div className="w-12 h-12 rounded-2xl bg-success/10 border border-success/20 flex items-center justify-center text-success">
+                  <ShieldCheck size={24} />
+               </div>
+               <div className="flex flex-col">
+                  <span className="text-[10px] font-black tracking-widest text-white/40 uppercase">Security Protocol</span>
+                  <h3 className="text-xl font-extrabold text-white">Isolation Forest Active</h3>
+               </div>
+            </div>
+            <p className="text-sm font-medium text-white/50 leading-relaxed">
+               Continuous monitoring across all 5 channels. System integrity verified for next inference cycle.
+            </p>
+            <div className="grid grid-cols-3 gap-4 border-t border-white/5 pt-6">
+               <div className="flex flex-col gap-1">
+                  <span className="text-[9px] font-black text-white/30 tracking-widest uppercase">Recall</span>
+                  <span className="text-lg font-black text-success">99.2%</span>
+               </div>
+               <div className="flex flex-col gap-1">
+                  <span className="text-[9px] font-black text-white/30 tracking-widest uppercase">Entropy</span>
+                  <span className="text-lg font-black text-accent">0.12</span>
+               </div>
+               <div className="flex flex-col gap-1">
+                  <span className="text-[9px] font-black text-white/30 tracking-widest uppercase">Latency</span>
+                  <span className="text-lg font-black text-info">12ms</span>
+               </div>
+            </div>
+         </div>
+
+         {/* SVG Donut Charts & Summary */}
+         <div className="lg:col-span-7 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="md:col-span-2 glass-aurora p-8 rounded-[40px] flex items-center justify-around">
+               <MLExplainer />
+            </div>
+            
+            <div className="flex flex-col gap-6">
+               {[
+                  { label: 'Throughput', val: '1.2 GB/S', icon: Zap, color: 'text-accent' },
+                  { label: 'Avg Pressure', val: '2.93 BAR', icon: Activity, color: 'text-primary' },
+                  { label: 'Total Flow', val: '507 L/S', icon: Info, color: 'text-success' },
+               ].map((item, i) => (
+                  <div key={i} className="flex-1 glass-aurora p-6 rounded-3xl flex flex-col justify-between group">
+                     <div className="flex items-center justify-between">
+                        <span className="text-[9px] font-black text-white/40 tracking-[0.2em] uppercase">{item.label}</span>
+                        <item.icon size={14} className={item.color} />
+                     </div>
+                     <span className="text-xl font-black text-white group-hover:text-primary transition-colors">{item.val}</span>
+                  </div>
+               ))}
+            </div>
+         </div>
+      </section>
+
+      {/* Footer Branded Bar */}
+      <footer className="py-8 border-t border-white/5 text-center">
+         <p className="text-[10px] font-black tracking-[0.5em] text-white/20 uppercase">
+            Strategic Water Management — Powered by Isolation Forest v2
+         </p>
       </footer>
-    </>
+    </div>
   );
 }
 

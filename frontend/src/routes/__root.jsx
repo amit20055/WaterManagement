@@ -41,8 +41,9 @@ function RootComponent() {
 
   return (
     <DataContext.Provider value={{ data, voiceEnabled, setVoiceEnabled, ZONE_NAMES }}>
-      <div className="min-h-screen">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6 animate-slide-up">
+      <div className="min-h-screen relative overflow-hidden selection:bg-primary/30">
+        <div className="noise-overlay" />
+        <div className="max-w-[1440px] mx-auto px-6 py-8 flex flex-col gap-8 animate-entrance relative z-10">
           <Header voiceEnabled={voiceEnabled} setVoiceEnabled={setVoiceEnabled} />
           {error ? (
             <div className="glass flex items-center justify-center py-24">

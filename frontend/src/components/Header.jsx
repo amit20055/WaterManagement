@@ -1,46 +1,84 @@
-import { Activity, Volume2, VolumeX } from 'lucide-react';
+import { Activity, Radio } from 'lucide-react';
+import { useNavigate } from '@tanstack/react-router';
+import { useAppData } from '../DataContext';
 
 export default function Header({ voiceEnabled, setVoiceEnabled }) {
+  const navigate = useNavigate();
+  const { data } = useAppData();
+  
+  // Create ticker items from live data
+  const tickerItems = Object.entries(data.recent || {}).map(([zone, readings]) => ({
+    label: zone,
+    value: readings.pressure.toFixed(2) + ' BAR',
+    isAnomaly: readings.is_anomaly
+  }));
+
   return (
-    <div className="glass grid-noise p-5 flex items-center justify-between">
-      <div className="flex items-center gap-4">
-        {/* Pulsing activity icon */}
-        <div className="relative">
-          <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: 'oklch(0.82 0.18 210 / 0.12)' }}>
-            <Activity size={24} style={{ color: 'var(--color-primary)' }} />
-          </div>
-          <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full animate-pulse-glow" style={{ background: 'var(--color-accent)', border: '2px solid var(--color-background)' }} />
-        </div>
-        <div>
-          <p className="text-xs font-semibold tracking-[0.2em] uppercase" style={{ color: 'var(--color-muted)' }}>
-            SMART WATER · ML ANOMALY DETECTION
-          </p>
-          <h1 className="text-2xl font-bold text-gradient">IoT Water Flow Command Center</h1>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-3">
-        {/* LIVE pill */}
-        <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wider" style={{ background: 'oklch(0.88 0.22 145 / 0.12)', color: 'var(--color-accent)', border: '1px solid oklch(0.88 0.22 145 / 0.25)' }}>
-          <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--color-accent)' }} />
-          LIVE
-        </span>
-
-        {/* Mute/Unmute button */}
-        <button
-          onClick={() => setVoiceEnabled(!voiceEnabled)}
-          className="w-10 h-10 rounded-full flex items-center justify-center transition-all hover:scale-105"
-          style={{
-            background: 'oklch(0.98 0.01 240 / 0.06)',
-            border: '1px solid var(--color-border)',
-          }}
-          title={voiceEnabled ? 'Mute Voice Alerts' : 'Enable Voice Alerts'}
+    <div className="flex flex-col gap-6">
+      <header className="flex flex-col sm:flex-row items-center justify-between gap-6 px-4">
+        <div 
+          className="flex items-center gap-4 cursor-pointer group"
+          onClick={() => navigate({ to: '/' })}
         >
-          {voiceEnabled
-            ? <Volume2 size={18} style={{ color: 'var(--color-accent)' }} />
-            : <VolumeX size={18} style={{ color: 'var(--color-muted)' }} />
-          }
-        </button>
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-gradient-to-br from-primary to-accent shadow-xl shadow-primary/20 transition-transform group-hover:scale-110">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+               <path d="M2 11c5-5 15-5 20 0" /><path d="M2 15c5-5 15-5 20 0" /><path d="M2 19c5-5 15-5 20 0" />
+            </svg>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-[10px] font-black tracking-[0.4em] text-muted uppercase">Strategic Water Intelligence</span>
+            <h1 className="text-3xl font-black hero-text bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
+              Command <span className="text-primary italic">Center</span>
+            </h1>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4">
+           <button
+            onClick={() => navigate({ to: '/compare' })}
+            className="flex items-center gap-2 px-6 py-2.5 rounded-full text-[11px] font-black tracking-widest transition-all duration-300 hover:scale-105 bg-white/5 hover:bg-white/10 text-white border border-white/10"
+          >
+            COMPARE
+          </button>
+          
+          <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-success/30 bg-success/10">
+            <span className="w-2 h-2 rounded-full bg-success animate-pulse shadow-[0_0_10px_var(--color-success)]" />
+            <span className="text-[11px] font-black tracking-widest text-success">LIVE</span>
+          </div>
+
+          <button
+            onClick={() => setVoiceEnabled(!voiceEnabled)}
+            className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${
+              voiceEnabled ? 'bg-primary text-white scale-110' : 'bg-white/5 text-muted hover:text-white'
+            } border border-white/10 shadow-lg`}
+          >
+            <Radio size={20} />
+          </button>
+        </div>
+      </header>
+
+      {/* Marquee Ticker */}
+      <div className="w-full h-12 glass-aurora border-y border-white/5 overflow-hidden flex items-center">
+        <div className="animate-marquee flex gap-12 items-center whitespace-nowrap">
+          {[...tickerItems, ...tickerItems].map((item, i) => (
+            <div key={i} className="flex items-center gap-4">
+               <div className={`w-1.5 h-1.5 rounded-full ${item.isAnomaly ? 'bg-primary animate-pulse' : 'bg-success'}`} />
+               <span className="text-[11px] font-bold text-muted uppercase tracking-widest">{item.label}</span>
+               <span className="text-[11px] font-black text-white bg-white/5 px-2 py-0.5 rounded-md">{item.value}</span>
+               <span className="text-white/10">|</span>
+            </div>
+          ))}
+          
+          {/* Constant status items */}
+          <div className="flex items-center gap-4">
+             <span className="text-[11px] font-black text-primary uppercase tracking-widest">System Nominal</span>
+             <span className="text-white/20">◆</span>
+             <span className="text-[11px] font-bold text-muted uppercase tracking-widest">AI Model: Isolation Forest v2</span>
+             <span className="text-white/20">◆</span>
+             <span className="text-[11px] font-bold text-muted uppercase tracking-widest">Latency: 12ms</span>
+             <span className="text-white/20">|</span>
+          </div>
+        </div>
       </div>
     </div>
   );
